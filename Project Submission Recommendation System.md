@@ -16,47 +16,50 @@
 
 Disadur dari Wikipedia, animasi didefinisikan sebagai film yang merupakan karya tangan atau gambar yang bergerak. Pada awalnya, animasi dibuat dari berlembar-lembar kertas gambar yang dikipaskan secara cepat sehingga muncul efek gambar bergerak [1]. Pada perkembangannya, animasi telah bertransformasi dari dua dimensi menjadi tiga dimensi karena bantuan teknologi dan grafika komputer. Di masa kini, animasi telah menjadi salah satu kebudayaan yang melekat di masyarakat dan menjadi bisnis miliaran rupiah.
 
-Di Jepang, animasi disebut dengan アニメーション (animeshon) atau disingkat dengan アニメ(anime).
+Di Jepang, animasi disebut dengan アニメーション (animeshon) atau disingkat dengan アニメ(anime). Saat ini, anime telah menjadi bisnis miliaran Yen yang perkembangannya dimulai dari pertama kali rilis serial kartun _Norakuro_ pada tahun 1931 [2]. Saat ini anime dapat disaksikan dimana saja terutama sejak munculnya _streaming video platform_ secara gratis atau berbayar seperti Netflix, YouTube, Hotstar, Crunchyroll, dan lainnya. Namun, adanya puluhan ribuan judul yang beredar saat ini sangatlah besar dan membuat para pengguna merasa kewalahan untuk menentukananime yang sesuai dengan selera mereka. 
 
+Atas dasar itu, proyek ini akan memberikan rekomendasi anime berdasarkan kemiripan genre dari anime yang menjadi referensi. Rekomendasi tersebut akan menggunakan algoritma _Content Based Filtering_ atau CBF yang menghasilkan top-N rekomendasi anime dan dievaluasi berdasarkan nilai presisi. Dengan ada studi ini, maka diharapkan waktu yang diperlukan oleh pengguna bisa lebih singkat dan dapat membawa keuntungan bagi _developer_ sebagai penyedia jasa.
 
 ## Business Understanding
 Berdasarkan dari latar belakang tersebut, maka pada laporan ini akan mencakup beberapa aspek berikut, mencakup:
 
 ### Problem Statements
-- Bagaimana hasil pemodelan dari algoritma  _Naive Bayes_?
-- Bagaimana hasil pemodelan dari algoritma _confusion matrix_?
-- Apakah model algoritma yang dibuat bisa dikatakan akurat?
+- Bagaimana hasil rekomendasi Top-N dari algoritma CBF dari genre anime yang sama?
+- Bagaimana hasil evaluasi pemodelan CBF?
   
 ### Goals
-- Mampu menghitung akurasi dari pemodelan dari algoritma  _Naive Bayes_.
-- Mampu menghitung presisi, _recall_ dan skor F1 dari pemodelan dari algoritma  _confusion matrix_.
-- Mampu membandingkan hasil dari model algoritma _Naive Bayes_ _confusion matrix_.
+- Mampu menghasilkan rekomendasi Top-N dari algoritma CBF berdasarkan genre anime yang sama.
+- Mampu menghitung presisi algoritma  CBF dan sesuai dengan rekomendasi anime di genre yang sama.
 
 ### Solution statements
-- Membandingkan hasil akurasi dari model _Naive Bayes_ dengan _confusion matrix_
+- Menganalisis dan memahami data dengan melakukan EDA dan visualisasi.
+- Menyiapkan data agar bisa digunakan dalam membangun model (menghilangkan _missing value_)
+- Melakukan pengembangan model dengan algoritma CBF serta melakukan penilaian presisi.
 
 ## Data Understanding
-_Dataset_ yang digunakan dalam proyek ini merupakan data _tweet_ pada Pemilihan Gubernur DKI Jakarta 2017 yang dapat diunduh di  [Kaggle : Sentiment Analysis](https://www.kaggle.com/datasets/deniyulian/sentiment-analysis).
+_Dataset_ yang digunakan dalam proyek ini merupakan data _tweet_ pada Pemilihan Gubernur DKI Jakarta 2017 yang dapat diunduh di  [Kaggle : Anime Database for Recommendation system](https://www.kaggle.com/datasets/vishalmane109/anime-recommendations-database).
 
 **Tabel 1: Informasi mengenai _dataset_**
 | Jenis                  | Keterangan                                                                                                        |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Sumber                 |  [Kaggle : Sentiment Analysis](https://www.kaggle.com/datasets/deniyulian/sentiment-analysis)                     |
+| Sumber                 |  [Kaggle : Anime Database for Recommendation system](https://www.kaggle.com/datasets/vishalmane109/anime-recommendations-database)                   |
 | Linsensi               |  CC0: Public Domain                                                                                               |
-| Kategori               | Sosial                                                                                                            |
-| Jenis & Ukuran berkas  | CSV (122KB)                                                                                                       |  
-| Nama dataset           | dataset_tweet_sentiment_pilkada_DKI_2017.csv                                                                      |  
-| Jumlah data            | 4 buah kolom (nomor, sentimen, pasangan calon, dan teks tweets), 900 baris                                        |  
+| Kategori               | Anime & Manga                                                                                                            |
+| Jenis & Ukuran berkas  | CSV (9.2 MB)                                                                                                       |  
+| Nama dataset           | Anime_data.csv                                                                      |  
+| Jumlah data            | 15 kolom, 17002 baris                                        |  
   
 ### Variabel-variabel pada _dataset_:
-Terdapat dua variabel utama yang digunakan pada proyek ini, yaitu sebagai berikut:
+Walaupun ada 15 kolom yang masing-masing berisi 15 data berbeda (seperti tipe, genre, rating, episode, dan yang lainnya), namun terdapat 5 variabel utama yang digunakan pada proyek ini pada EDA maupun simulasi CBF, yaitu sebagai berikut:
 
 **Tabel 2: Informasi mengenai variabel**
 | Variabel                  | Keterangan                                                                                                        |
 | --------------------------| ----------------------------------------------------------------------------------------------------------------- |
-| sentiment                 | jenis sentimen dari masing-masing _tweet_, terdiri dari dua pilihan, yaitu _positive_ dan _negative_.             |
-| tweet text                | kumpulan _tweet_ yang berisikan mengenai topik politik saat pemilihan Gubernur DKI Jakarta pada 2017              |
-
+| Rating                 | Penilaian rata-rata anime dari pengguna yang nilainya dari 0-10             |
+| Title                | Judul anime              |
+| Type                 | Tipe anime (film/seri)            |
+| Members                | Jumlah pengguna yang menambahkan anime tersebut pada daftar tontonan mereka              |
+| Genre                 | Genre anime             |
 
 
 ## _Data Preparation_
@@ -69,16 +72,68 @@ Sebelum memulai pengolahan data, maka sebelumnya diperlukan beberapa tahapan sep
   <br>
 
   Setelah tanda baca, tautan, dan simbol yang tidak perlu telah dikurangi, maka data eksisting akan terlihat seperti gambar di bawah ini
+**Tabel 3: Cuplikan _dataset_**
+  <br>
   
-| Id  |  Sentiment |Pasangan Calon| Text Tweet                                         	|
-|-----|------------|-------------	|----------------------------------------------------	|
-|  0 	|  negative 	| Agus-Sylvi  	| Banyak akun kloning seolah2 pendukung agussilv...  	|
-|  1 	|  negative 	| Agus-Sylvi  	|  agussilvy bicara apa kasihan yaalap itu air ma... 	|
-|  2 	|  negative 	| Agus-Sylvi  	|  Kalau aku sih gak nunggu hasil akhir QC tp lag... 	|
-|  3 	|  negative 	| Agus-Sylvi  	|  Kasian oh kasian dengan peluru 1milyar untuk t... 	|
-|  4 	|  negative 	| Agus-Sylvi  	|  Maaf ya pendukung AgusSilvyhayo dukung AniesSa... 	|
+| Anime_id  	| Title  	|  Genre 	|  Synopsis 	|  Type 	| Producer  	| Studio  	|  Rating							 	| ScoredBy  	| Popularity  	|  Members 	| Episodes  	| Source  	| Aired  	| Link  	|
+|---	|---	|---	|---	|---	|---	|---	|---	|---	|---	|---	|---	|---	|---	|---	|
+|  1 	| Cowboy Bebop|  ['Action', 'Adventure', 'Comedy', 'Drama', 'Sc... 	|  In the year 2071, humanity has colonized sever... 	|  TV 	|  ['Bandai Visual'] 	|  ['Sunrise'] 	|  8.81 	| 363889.0  	| 39.0  	| 704490.0  	| 26.0  	|  Original 	|  Apr 3, 1998 to Apr 24, 1999 	|  https://myanimelist.net/anime/1/Cowboy_Bebop 	|
+|  5	 |  Cowboy Bebop: Tengoku no Tobira		| ['Action', 'Space', 'Drama', 'Mystery', 'Sci-Fi']	  	| Another day, another bounty—such is the life o...	  	| Movie	   	|  ['Sunrise', 'Bandai Visual']	 	| ['Bones']	  	| 8.41	  	| 111187.0	 	|475.0	   	| 179899.0	   	|1.0	   	| Original	  	|  Sep 1, 2001	 	| https://myanimelist.net/anime/5/Cowboy_Bebop__...  	|
+| 6	  	|  Trigun	 	| ['Action', 'Sci-Fi', 'Adventure', 'Comedy', 'D...	  	|  Vash the Stampede is the man with a $$60,000,0...	 	| TV	 	| ['Victor Entertainment']	  	|   ['Madhouse']	 	|  8.31 	| 	197451.0  	| 158.0 	 	| 372709.0	  	| 26.0	 	  	| Manga 	| 	Apr 1, 1998 to Sep 30, 1998	  	|  https://myanimelist.net/anime/6/Trigun 	|
+
+<br>
+
+- Melihat bentuk/shape data untuk mengetahui kolom dan baris pada _dataset_
+- Mendeteksi _missing_ value dengan cara menggunakan kode `df.isna().sum`
+Pengecekan _missing value_ menghasilkan data seperti tabel berikut:
+<br>
+
+**Tabel 4: Tabel kolom dan _missing value_**
+
+  | Kolom  	| Jumlah _missing value_  	|
+|---	|---	|
+| Anime_id          	|   0 	|
+|  Title           |  0 	|
+| Genre        	| 2012  	|
+|  Synopsis      	|  1419 	|
+|  Type           | 634  	|
+|  Producer     	|   9367 	|
+|  Studio        |  9083 	|
+| Rating          	|  2577 	|
+| ScoredBy        	|  3775 	|
+|  Popularity      	|  634 	|
+|  Members           	|  0 	|
+|   Episodes      	| 2917  	|
+|  Source         	| 1927  	|
+|   Aired          	| 634  	|
+|   Link          	| 634  	|
 
 
+- Menghilangkan _missing value_ pada _dataset_ menggunakan kode `df=df.dropna()`
+- Mengecek kolom dan jumlah _missing value_, pada kasus ini data sudah bersih dan tidak mengandung _missing value_ seperti tabel di bawah ini,
+<br>
+
+**Tabel 5: Tabel kolom dan _missing value_ setelah menghapus _missing value_**
+
+  | Kolom  	| Jumlah _missing value_  	|
+|---	|---	|
+| Anime_id          	|   0 	|
+|  Title           |  0 	|
+| Genre        	| 0  	|
+|  Synopsis      	|  0 	|
+|  Type           | 0  	|
+|  Producer     	|   0 	|
+|  Studio        |  0 	|
+| Rating          	|  0 	|
+| ScoredBy        	|  0 	|
+|  Popularity      	|  0 	|
+|  Members           	|  0 	|
+|   Episodes      	| 0  	|
+|  Source         	| 0  	|
+|   Aired          	| 0  	|
+|   Link          	| 0  	|
+
+-  
 - Melakukan visualisasi data menggunakan pie chart dan WordCloud untuk melihat banyaknya _dataset_ yang memiliki sentimen baik positif maupun negatif. Untuk visualisasi _pie chart_ dapat menggunakan kode `plt.pie()`. Didapatkan hasil bahwa untuk _dataset_ tersebut memiliki 50% sentimen positif dan 50% sentimen negatif sesuai gambar di bawah ini,
 
 <br>
@@ -159,6 +214,6 @@ Dari percobaan ini maka dapat disimpulkan beberapa hal yaitu:
 - Kedua metode tersebut memiliki akurasi yang relatif tinggi dan hasil yang serupa.
   
 ## Referensi
-- [1] [Lawelai, H., Sadat, A., & Suherman, A. (2022). Democracy and Freedom of Opinion in Social Media: Sentiment Analysis on Twitter. PRAJA: Jurnal Ilmiah Pemerintahan, 10(1), 40-48.](https://jurnal.umsrappang.ac.id/praja/article/view/585)
-- [2] [Buntoro, G. A., Arifin, R., Syaifuddiin, G. N., Selamat, A., Krejcar, O., & Hamido, F. (2021). The implementation of the machine learning algorithm for the sentiment analysis of Indonesia’s 2019 presidential election. IIUM Engineering Journal, 22(1), 78-92.](https://journals.iium.edu.my/ejournal/index.php/iiumej/article/view/1532)
+- [1] [Wikipedia - Ensiklopedia Bebas - Animasi](https://id.wikipedia.org/wiki/Animasi)
+- [2] [Napier, S. (2011). Manga and anime: entertainment, big business, and art in Japan. In Routledge handbook of Japanese culture and society (pp. 226-237). Routledge.](https://books.google.co.id/books?hl=id&lr=&id=0cBYffHp5L4C&oi=fnd&pg=PA226&dq=manga+and+anime+%22big+business%22&ots=VL1yttTe-w&sig=Gf7zHra0GerfiSF8rAZ14xXl8io&redir_esc=y#v=onepage&q=manga%20and%20anime%20%22big%20business%22&f=false)
 - [3] [Leung, K. M. (2007). Naive bayesian classifier. Polytechnic University Department of Computer Science/Finance and Risk Engineering, 2007, 123-156.](https://cse.engineering.nyu.edu/~mleung/FRE7851/f07/naiveBayesianClassifier.pdf)
