@@ -1,6 +1,4 @@
-# Laporan Proyek Machine Learning -  Sistem Rekomendasi _Content Based Filtering_ untuk _Database_ Anime dari Komunitas MyAnimeList
-
-#### Penulis: Billy Akbar Prabowo
+# Laporan Proyek Machine Learning -  Billy Akbar Prabowo
 
  Proyek ini ditulis untuk pemenuhan _submission_ kedua pada tema _recommendation system_. Proyek ini membahas mengenai model rekomendasi sistem menggunakan metode _Content Based Filtering_ atau CBF pada data kumpulan anime dari Komunitas Virtul MyAnimeList. Proyek ini memiliki _output_ untuk mampu menentukan top-N rekomendasi anime bagi para pengguna.
 
@@ -50,7 +48,7 @@ _Dataset_ yang digunakan dalam proyek ini merupakan data _tweet_ pada Pemilihan 
 | Jumlah data            | 15 kolom, 17002 baris                                        |  
   
 ### Variabel-variabel pada _dataset_:
-Walaupun ada 15 kolom yang masing-masing berisi 15 data berbeda (seperti tipe, genre, rating, episode, dan yang lainnya), namun terdapat 5 variabel utama yang digunakan pada proyek ini pada EDA maupun simulasi CBF, yaitu sebagai berikut:
+Terdapat 15 kolom yang masing-masing berisi 15 data berbeda (seperti tipe, genre, rating, episode, dan yang lainnya). Penjelasan masing-masing variabel ada di bawah tabel berikut,
 
 **Tabel 2: Informasi mengenai variabel**
 | Variabel                  | Keterangan                                                                                                        |
@@ -59,7 +57,17 @@ Walaupun ada 15 kolom yang masing-masing berisi 15 data berbeda (seperti tipe, g
 | Title                | Judul anime              |
 | Type                 | Tipe anime (film/seri)            |
 | Members                | Jumlah pengguna yang menambahkan anime tersebut pada daftar tontonan mereka              |
+| Anime_id                 | Penomoran judul anime             |
+| Synopsis                 | Penjelasan singkat mengenai judul anime             |
+| Producer                | Nama produser yang merilis anime tersebut              |
+| Studio                 | Perusahaan yang merilis anime tersebut            |
+| ScoredBy | Jumlah pengguna yang memberikan rating              |
 | Genre                 | Genre anime             |
+| Popularity                 | Ranking anime berdasarkan popularitas             |
+| Episodes                | Jumlah episode pada anime tersebut              |
+| Sources                 | Sumber anime tersebut (mengadaptasi sebuah manga atau original)            |
+| Aired | Tanggal anime tersebut ditayangkan dan selesai tayang              |
+| Link                 | Link mengenai anime tersebut di website komunitas MyAnimeList            |
 
 
 ## _Data Preparation_
@@ -220,8 +228,12 @@ $\text{Presisi} = \frac{Jumlah-item-rekomendasi-relevan}{Jumlah-semua-item-yang-
 
 Dengan rumus tersebut, maka dihasilkan bahwa presisi dalam menentukan rekomendasi anime _Kogepan_ berdasarkan genre adalah 5/5 atau 100%. Maka dari itu, pada kasus ini, penggunaan metode CBF efektif dan selektif dalam menentukan rekomendasi judul anime yang diinginkan oleh pengguna.
 
+### Kesimpulan
+
 Dari percobaan ini maka dapat disimpulkan beberapa hal yaitu:
-- Rekomendasi anime _Kogepan_ yang memiliki genre _Comedy_ menghasilkan 5 judul rekomendasi anime yang memiliki genre _Comedy_ yaitu _Yagami-kun no Katei no Jijou, Osomatsu-kun, Sword Art Online II: Sword Art Offline II,Tensai? Dr. Hamax,_ dan _Osomatsu-kun (1988): Appare! Chibita no Onitai..._.
+- Percobaan sistem rekomendasi menggunakan metode CBF dimulai dari pra-pemrosesan data yang meliputi hilangkan _missing value_, mengecek data type dari tiap kolom, menghilangkan tanda baca maupun simbol yang tidak perlu dengan tujuan untuk mengurangi _noise_, EDA, dan TF-IDF.
+- Percobaan dilanjut dengan mengimplementasikan matriks TF-IDF dengan _cosinus similarity_ yang akan menghasilkan matriks bernilai kosinus. Nilai kosinus yang semakin besar menunjukkan sudut yang kecil sehingga tendensi untuk mirip semakin besar.
+- Setelah menjalankan fungsi _cosine similarity_, percobaan dilanjut dengan menambahkan judul anime referensi yang akan dicari rekomendasinya, yaitu anime _Kogepan_. Anime tersebut memiliki genre _Comedy_ dan pada percobaan akan menghasilkan 5 judul rekomendasi anime yang memiliki genre _Comedy_ yaitu _Yagami-kun no Katei no Jijou, Osomatsu-kun, Sword Art Online II: Sword Art Offline II,Tensai? Dr. Hamax,_ dan _Osomatsu-kun (1988): Appare! Chibita no Onitai_.
 - Perhitungan dengan algoritma CBF dan _cosine similarity_ memperoleh presisi sebesar 100.00% karena semua anime yang direkomendasikan memiliki genre yang sama. Maka dari itu, metode ini dapat dinilai efekti dalam merekomendasikan sesuatu yang memiliki hal serupa.
 
 ## Referensi
