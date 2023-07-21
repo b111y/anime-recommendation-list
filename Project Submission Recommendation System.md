@@ -67,10 +67,8 @@ Sebelum memulai pengolahan data, maka sebelumnya diperlukan beberapa tahapan sep
 - Mengimpor library dengan kode `import`
 - Menghubungkan Google Colab dihubungkan dengan sumber _dataset_ (pada kasus ini _dataset_ disimpan pada Google Drive) dengan kode `import()`
 - Membaca _dataset_ dengan kode `pd.read_csv()`
-- Menghilangkan tanda baca, tautan, maupun simbol yang tidak perlu (karakter selain pembentuk kata) dengan tujuan untuk mengurangi _noise_ pada model dengan kode `data['Text Tweet'].apply(lambda x: re.sub(r'http\S+', '', x))` dan `data['Text Tweet'].apply(lambda x: re.sub(r'[^a-zA-Z0-9\s]', '', x))`
-
   <br>
-
+  
   Setelah tanda baca, tautan, dan simbol yang tidak perlu telah dikurangi, maka data eksisting akan terlihat seperti gambar di bawah ini
 **Tabel 3: Cuplikan _dataset_**
   <br>
@@ -132,41 +130,29 @@ Pengecekan _missing value_ menghasilkan data seperti tabel berikut:
 |  Source         	| 0  	|
 |   Aired          	| 0  	|
 |   Link          	| 0  	|
-
--  
-- Melakukan visualisasi data menggunakan pie chart dan WordCloud untuk melihat banyaknya _dataset_ yang memiliki sentimen baik positif maupun negatif. Untuk visualisasi _pie chart_ dapat menggunakan kode `plt.pie()`. Didapatkan hasil bahwa untuk _dataset_ tersebut memiliki 50% sentimen positif dan 50% sentimen negatif sesuai gambar di bawah ini,
-
-<br>
-
-![image](https://github.com/b111y/politic-sentiment-analysis/assets/84972036/b3fb8ad0-1d31-47df-80e0-bfd4d6e3ebab)
-
-
 <br>
 
 
-- Melakukan pembagian _dataset_ menjadi dua yaitu data uji dan data latih dengan data uji sebesar 20% untuk masing-masing tipe sentimen. Pembagian _dataset_ menggunakan kode `train_test_split()` dan diperoleh bahwa data pelatihan dan data uji sejumlah berikut:
+- Mengecek data type dari tiap kolom dengan kode `df.dtypes` dan mengubah tipe data kolom Genre menjadi string dengan kode `df['Genre'] = df['Genre'].astype('str')`
+- Menghilangkan tanda baca maupun simbol yang tidak perlu dengan tujuan untuk mengurangi _noise_
+- Melakukan _Exploratory Data Analysis_ atau EDA dengan melihat data statistik dari _dataset_ yang telah dimodifikasi. Dari data tersebut diperoleh bahwa rating tertinggi ialah 10.00 dan rating terendah adalah 2.33, dimana _members_ tertinggi dalam suatu anime mencapai 1.451.708 pengguna!
+- Melihat rerata _rating_ menggunakan _bar chart_, dari gambar di bawah dapat disimpulkan bahwa rating 7 merupakan frekuensi tertinggi dari _dataset_.
+
+![Gambar 2: Analisis distribusi rating anime](https://github.com/b111y/anime-recommendation-list/assets/84972036/55a695d9-9504-4a5d-aeee-fa77fecb5747)
+
+**Gambar 2: Analisis distribusi rating anime menggunakan _bar chart_**
 <br>
 
-| Aspek  |  Jumlah Data Pelatihan | Jumlah Data Uji | Jumlah    |
-|-----   |------------------------|----------------	|-----------|
-|  Positif 	|  360 	| 90  	| 450 |
-|  Negatif 	|  360 	| 90   | 450 |
+- Melihat jumlah tipe anime yang ada di komunitas MyAnimeList menggunakan _bar chart_. Dari data tersebut dapat dilihat bahwa frekuensi terbanyak tipe anime adalah TV, dan diikuti oleh OVA, Movie, dan yang lainnya.
+- 
+![image](https://github.com/b111y/anime-recommendation-list/assets/84972036/b43ddd39-7a24-4f8e-bb4c-d05f611b535b)
 
-<br>
+**Gambar 3: Analisis distribusi tipe anime menggunakan _bar chart_**
 
-- Mengaplikasikan _Term Frequency-Inverse Document Frequency (TF-IDF)_ `TfidfVectorizer()` yang akan menilai dan melakukan tokenisasi dan digunakan untuk mengetahui frekuensi suatu kata muncul di dalam dokumen pada data yang sudah dibagi menjadi data uji dan data pelatihan. Setelah mengimplementasikan TF-IDF, dilakukan pengecekan dataframe setelah dilakukan ekstraksi dengan metode TF-IDF yang tergambar pada gambar dibawah ini,
+- Mengecek anime dengan member tertinggi menggunakan kode `df.sort_values`, diperoleh bahwa top 3 anime dengan member tertinggi adalah Death Note, Shingeki no Kyojin, dan Sword Art Online.
+- Mengecek anime dengan rating tertinggi menggunakan kode `df.sort_values`, diperoleh bahwa top 3 anime dengan rating tertinggi adalah Death Note, Shingeki no Kyojin, dan Sword Art Online.
+-  Mengaplikasikan _Term Frequency-Inverse Document Frequency (TF-IDF)_ `TfidfVectorizer()` yang akan menilai dan melakukan tokenisasi dan digunakan untuk mengetahui frekuensi suatu kata muncul di dalam dokumen pada _dataset_.
 
-<br>
-
-![image](https://github.com/b111y/politic-sentiment-analysis/assets/84972036/82d7ff61-85a1-42e1-8d2a-b4af1fae3809)
-
-<br>
-
-- Melakukan EDA dengan bantuan visualisasi WordCloud dan bar-chart untuk kata-kata yang sering muncul pada data yang telah dibagi menjadi data pelatihan dan data uji. Visualisasi WordCloud dapat dilakukan dengan kode `WordCloud()` dan untuk bar-chart dapat menggunakan kode  `plt.bar`. Hasil menunjukkan bahwa 5 kata tertinggi yang sering muncul adalah **ahy, ahokdjarot, yang, aniessandi**, dan **ahok** sesuai pada gambar di bawah ini,
-
-![image](https://github.com/b111y/politic-sentiment-analysis/assets/84972036/e7f016e6-60d5-4bb1-a5d9-aa80651ce33f)
-
-![image](https://github.com/b111y/politic-sentiment-analysis/assets/84972036/05bb01f9-49f6-489d-b073-20c3e0eccaef)
 
 ## Modeling
 Pada tahap _modeling_, data yang telah dipreparasi akan diuji dengan metode _Naive Bayes_ dan metode _confusion matrix_. Metode algoritma _Naive Bayes_ metode yang dapat memprediksi kelas/kategori probabilitas keanggotaan, seperti probabilitas bahwa sampel yang diberikan milik kelas/kategori tertentu [3]. Metode ini didasarkan pada teorema Bayes yang mengasumsikan bahwa peluang dari 2 kejadian terjadi saling memengaruhi. Maka dari itu, metode _Naive Bayes_ mampu mengasumsikan probabilitas ketika user sudah mengetahui probabilitas tertentu lainnya. Metode ini terkenal mudah dan sederhana. Di sisi lain, walaupun metode ini dapat mengasumsikan probabilitas ketika user sudah dapat mengetahui probabilitas tertentu lainnya, jika probabilitas kondisionalnya nol maka prediksi akan bernilai nol juga. Algoritma _Naive Bayes_ akan menghasilkan akurasi yang dapat dihitung dari jumlah data yang diklasifikan dengan benar dibagi dengan jumlah semua data yang diklasifikasikan atau dapat ditulis pada rumus berikut:
