@@ -155,51 +155,77 @@ Pengecekan _missing value_ menghasilkan data seperti tabel berikut:
 
 
 ## Modeling
-Pada tahap _modeling_, data yang telah dipreparasi akan diuji dengan metode _Naive Bayes_ dan metode _confusion matrix_. Metode algoritma _Naive Bayes_ metode yang dapat memprediksi kelas/kategori probabilitas keanggotaan, seperti probabilitas bahwa sampel yang diberikan milik kelas/kategori tertentu [3]. Metode ini didasarkan pada teorema Bayes yang mengasumsikan bahwa peluang dari 2 kejadian terjadi saling memengaruhi. Maka dari itu, metode _Naive Bayes_ mampu mengasumsikan probabilitas ketika user sudah mengetahui probabilitas tertentu lainnya. Metode ini terkenal mudah dan sederhana. Di sisi lain, walaupun metode ini dapat mengasumsikan probabilitas ketika user sudah dapat mengetahui probabilitas tertentu lainnya, jika probabilitas kondisionalnya nol maka prediksi akan bernilai nol juga. Algoritma _Naive Bayes_ akan menghasilkan akurasi yang dapat dihitung dari jumlah data yang diklasifikan dengan benar dibagi dengan jumlah semua data yang diklasifikasikan atau dapat ditulis pada rumus berikut:
+Pada tahap _modeling_, data yang telah dipreparasi akan diuji dengan metode CBF. Metode CBF berusaha untuk menghitung atau menentukan rekomendasi berdasarkan kemiripan [3]. Jika suatu konten atau anime memiliki suatu karakteristik yang sama dengan anime lainnya, maka algoritma CBF akan mengidentifikasi bahwa kedua anime tersebut mirip. Algoritma ini memiliki kelebihan yaitu mudah diaplikasikan, memudahkan calon pengguna yang baru saja mengakses atau mencari suatu hal yang baru, CBF juga menghendaki independensi pengguna melalui data historikal dan rating eksklusif yang digunakan oleh pengguna aktif untuk membangun profil mereka sendiri [3]. Namun, CBF juga memiliki limitasi seperti erbatasnya rekomendasi hanya pada item-item yang mirip sehingga tidak ada kesempatan untuk mendapatkan item yang tidak terduga [3].
+
+Selain CBF, maka salah satu metode yang digunakan dalam pemrosesan data ialah _Term Frequency-Inverse Document Frequency_ atau TF-IDF. Metode ini berguna untuk menghitung bobot setiap kata yang umum digunakan dan melakukan tokenisasi di setiap dokumen dalam korpus. Maka dari itu, metode TF-IDF digunakan untuk mengetahui berapa sering suatu kata muncul di dalam dokumen. Peningkatan nilai TF-IDF secara linear sesuai dengan jumlah kemunculan kata tersebut. Setelah itu, hasil TF-IDF tersebut ditransformasikan dalam bentuk matriks dengan fungsi `todense()`.
+
+Pada konsepnya, jika matriks TF-IDF memiliki nilai matriks yang semakin tinggi, maka semakin sama atau mirip hubungan antara anime dengan genre atau anime tersebut dengan anime pembanding. Pada tabel di bawah ini, setelah dilakukan pemetaan matriks antara genre dan judul anime dengan bantuan fungsi `todense()`, anime _Wild Arms: Twillight Venom_ memiliki nilai matriks sebesar 0.323 pada genre _fantasy_ dan 0.324 pada genre _adventure_. Hal tersebut dapat menunjukkan bahwa kemungkinan genre yang dimiliki oleh anime tersebut mirip dengan genre _fantasy_ dan _adventure_. 
 <br>
-$\text{Accuracy} = \frac{correctly-classified-items}{all-classified-items}$
+**Tabel 6: Hasil TF-IDF dan fungsi _todense_ menghasilkan pemetaan antara judul anime dan genre anime**
+
+|  Judul/Genre 	| fantasy  	| adventure  	|
+|---	|---	|---	|
+| Wild Arms: Twilight Venom  	| 0.323314  	| 0.324773	  	|
+|  Donburi Kazoku 	|  0.000000 	| 0.000000  	|
+
+Setelah dapat memetakan tendensi kemiripan antara judul dan genre, maka untuk dapat memetakan antara satu judul anime dengan judul lainnya dan menilai kemiripannya, diperlukan metode _cosine similarity_. Metode ini menghitung dua sudut antara dua objek. Metode ini membandingkan kedua objek tersebut pada skala normal dan menemukan _dot product_ antara dua objek tersebut [4]. Metode _cosine similarity_ dapat diilustrasikan pada gambar di bawah ini. Dari gambar tersebut, dapat dilihat pada ketika dua objek tersebut memiliki kosinus sudut yang kecil, maka diasumsikan bahwa objek tersebut memiliki kemiripan, dan berlaku sebaliknya.  Metode ini memiliki kelebihan yaitu akurasi tinggi dan mudah diimplementasikan.
+
+![image](https://github.com/b111y/anime-recommendation-list/assets/84972036/7e2fcba0-63de-4faf-9ec6-384132d3d4ae)
+
+**Gambar 4: Ilustrasi _Cosine simlarity_**
+
+Fungsi _cosine similarity_ dapat dilakukan dengan cara menghitung dari matriks TF-IDF dengan kode `cosine_similarity(tfidf_matrix)`. Dalam kasus ini, setelah menjalankan fungsi tersebut, maka akan muncul matriks judul referensi dan judul pembanding. Nilai kosinus yang muncul di dalam matriks berkisar antara 0 hingga 1. Semakin tinggi nilai kosinus, maka semakin kecil sudutnya, yang menjadikan bahwa judul referensi dan judul pembanding memiliki tendensi yang sama dalam hal genre. Berikut cuplikan tabel hasil implementasi fungsi _cosine similarity_.
+<br>
+**Tabel 7: Matriks kosinus _cosine similarity_**
+
+|  Judul 	| Hanitarou Desu  	| Hiiro no Kakera: Totsugeki! Tonari no Ikemenzu  	|
+|---	|---	|---	|
+| Hanamaru Youchien  	|  0.836710	  	| 0.104588	  	|
+|  Amanchu! 	|  0.813499	 	| 0.101686  	|
+
 <br>
 
-_Confusion matrix_ merupakan metode evaluasi model dalam melakukan klasifikasi yang terdiri dari ringkasan tabel jumlah perdiksi yang benar dan salah dengan 4 matriks nilai, yaitu _True Positive (TP), True Negative (TN), False Positive (FP)_, dan _False Negative (FN)_. Suatu model _confusion matrix_ dapat dikatakan bagus jika memiliki nilai _True Positive_ dan _True Negative_ yang tinggi.
+Dari tabel di atas, dapat disimpulkan bahwa Anime _Hanamaru Youchien_, _Hanitarou Desu_ dan _Amanchu!_ memiliki kemiripan yang tinggi dalam hal genre. Percobaan selanjutnya adalah memasukkan judul anime referensi untuk mencari Top-5 rekomendasi anime dalam hal genre. Dalam kasus ini, anime berjudul _Kogepan_ yang memiliki genre _Comedy_ akan menjadi judul anime referensi dengan informasi anime tersebut di tabel berikut,
+<br>
+**Tabel 8: Judul anime referensi yang akan dicarikan top-5 rekomendasi anime berdasarkan genre**
 
-Terdapat beberapa aspek parameter untuk _confusion matrix_, yaitu presisi, _recall_, dan F1. Presisi adalah pembagian antara TP dengan (TP+FP) atau perbandingan hasil yang positif secara benar dengan semua data yang dikategorikan sebagai positif, atau dapat ditulis pada rumus berikut:
-<br>
-$\text{Presisi} = \frac{TP}{TP+FP}$
-<br>
+| Judul  	| Genre  	|
+|---	|---	|
+| Kogepan          	|   Comedy 	|
 
-Sedangkan _recall_ adalah pembagian antara TP dengan (TP+FN) atau pembagian hasil yang positif secara benar dengan penjumlahan semua hal yang seharusnya dikategorikan positif, atau dapat diekspresikan dengan rumus berikut:
-<br>
-$\text{Recall} = \frac{TP}{TP+FN}$
 <br>
 
+Setelah itu, Top-5 rekomendasi anime _Kogepan_ menghasilkan tabel di bawah ini,
 
-Terakhir, skor F1 diperoleh dari perkalian dari perbandingan (presisi x _recall_) dengan (presisi + _recall) yang hasilnya dikali 2, atau diekspresikan pada rumus berikut:
-<br>
-$\text{F1} = \frac{2 \* Precision \* Recall}{Precision+Recall}$    
+**Tabel 9: Hasil top-5 rekomendasi anime berjudul _Kogepan_**
+
+| Judul  	| Genre  	|
+|---	|---	|
+| Yagami-kun no Katei no Jijou          	|   Comedy 	|
+| Osomatsu-kun          	|   Comedy 	|
+| Sword Art Online II: Sword Art Offline II	          	|   Comedy 	|
+| Tensai? Dr. Hamax          	|   Comedy 	|
+| Osomatsu-kun (1988): Appare! Chibita no Onitai...          	|   Comedy 	|
+
 <br>
 
-Dari aspek-aspek di atas, maka masing-masing nilainya akan dibandingkan untuk mengukur ketepatan antarmodel. Jika nilai mendekati 100% maka dapat dikatakan model tersebut semakin baik.
+Dapat dilihat dari tabel di atas, bahwa rekomendasi anime _Kogepan_ menghasilkan 5 judul anime dengan genre yang sama, yaitu  _Comedy_. Jadi, jika pengguna menyukai anime _Kogepan_, sistem rekomendasi akan merekomendasikan film di atas karena kesamaan genre.
 
 ## Evaluation
-Percobaan menggunakan model _Naive Bayes_, nilai akurasi diukur dengan rumus pada bab Modeling. Setelah dijalankan, maka didapatkan akurasi sebesar 75.56%. Dari hasil ini dapat diindikasikan bahwa ada kemungkinan salah klasifikasi pada _tweet_ karena adanya kemungkinan untuk _False Positive_ maupun _False Negative_. Maka dari itu, _confusion matrix_ dapat membantu untuk evaluasi model dan melihat nilai pengukuran lain (yaitu presisi, _recall_, dan skor F1).
+Percobaan menggunakan model CBF yang menggunakan metode _cosine similarity_ memiliki nilai presisi yang dapat dituliskan pada rumus di bawah ini,
 
-Implementasi model _confusion matrix_ yang menghasilkan matriks 2x2, sebagai berikut dan nilai presisi, _recall_, dan skor F1. Dari hasil matriks 2x2, hasil yang diperoleh untuk TP dan TN memiliki nilai yang relatif tinggi. Hal ini membuktikan bahwa model ini sudah lumayan bagus untuk melakukan klasifikasi sentimen. Selain itu, didapatkan juga nilai presisi, _recall_, dan skor F1. Nilai presisi pada model ini adalah 76.02%, atau sedikit lebih tinggi dengan akurasi _Naive Bayes_. Sedangkan diperoleh nilai _recall_ adalah 75.56% atau sama dengan akurasi pada _Naive Bayes_. Terakhir,diperoleh F1 sebesar 75.45% yang hasilnya hampir mirip dengan _recall_ dan akurasi _Naive Bayes_.
+$\text{Presisi} = \frac{Jumlah-item-rekomendasi-relevan}{Jumlah-semua-item-yang-direkomendasikan}$
 
-Hasil percobaan tersebut dapat disimpulkan pada tabel di bawah ini,
+<br>
 
-|  Aspek 	|  Metode 	| Hasil (%)  	|
-|---	|---	|---	|
-|  Akurasi 	|  _Naive Bayes_ 	|  75.56 	|
-|  Presisi 	|  _Confusion Matrix_ 	|  76.02 	|
-|  _Recall_ 	|  _Confusion Matrix_ 	|  75.56 	|
-|  F1 	|  _Confusion Matrix_ 	|  75.45 	|
+Dengan rumus tersebut, maka dihasilkan bahwa presisi dalam menentukan rekomendasi anime _Kogepan_ berdasarkan genre adalah 5/5 atau 100%. Maka dari itu, pada kasus ini, penggunaan metode CBF efektif dan selektif dalam menentukan rekomendasi judul anime yang diinginkan oleh pengguna.
 
 Dari percobaan ini maka dapat disimpulkan beberapa hal yaitu:
-- Preparasi data dilakukan dengan cara menghilangkan tanda baca, simbol, dan tautan untuk menghindari _noise_ serta TF-IDF
-- Pemodelan dilakukan dengan metode _Naive Bayes_ yang memperoleh akurasi 75.56% dan _confusion matrix_ yang memperoleh nilai presisi sebesar 76.02%, nilai _recall_ sebesar 75.56%, dan F1 sebesar 75.45%.
-- Kedua metode tersebut memiliki akurasi yang relatif tinggi dan hasil yang serupa.
-  
+- Rekomendasi anime _Kogepan_ yang memiliki genre _Comedy_ menghasilkan 5 judul rekomendasi anime yang memiliki genre _Comedy_ yaitu _Yagami-kun no Katei no Jijou, Osomatsu-kun, Sword Art Online II: Sword Art Offline II,Tensai? Dr. Hamax,_ dan _Osomatsu-kun (1988): Appare! Chibita no Onitai..._.
+- Perhitungan dengan algoritma CBF dan _cosine similarity_ memperoleh presisi sebesar 100.00% karena semua anime yang direkomendasikan memiliki genre yang sama. Maka dari itu, metode ini dapat dinilai efekti dalam merekomendasikan sesuatu yang memiliki hal serupa.
+
 ## Referensi
 - [1] [Wikipedia - Ensiklopedia Bebas - Animasi](https://id.wikipedia.org/wiki/Animasi)
 - [2] [Napier, S. (2011). Manga and anime: entertainment, big business, and art in Japan. In Routledge handbook of Japanese culture and society (pp. 226-237). Routledge.](https://books.google.co.id/books?hl=id&lr=&id=0cBYffHp5L4C&oi=fnd&pg=PA226&dq=manga+and+anime+%22big+business%22&ots=VL1yttTe-w&sig=Gf7zHra0GerfiSF8rAZ14xXl8io&redir_esc=y#v=onepage&q=manga%20and%20anime%20%22big%20business%22&f=false)
-- [3] [Leung, K. M. (2007). Naive bayesian classifier. Polytechnic University Department of Computer Science/Finance and Risk Engineering, 2007, 123-156.](https://cse.engineering.nyu.edu/~mleung/FRE7851/f07/naiveBayesianClassifier.pdf)
+- [3] [Thorat, P. B., Goudar, R. M., & Barve, S. (2015). Survey on collaborative filtering, content-based filtering and hybrid recommendation system. International Journal of Computer Applications, 110(4), 31-36.](https://d1wqtxts1xzle7.cloudfront.net/59762468/10.1.1.695.642820190617-91457-z4s1rf-libre.pdf?1560756140=&response-content-disposition=inline%3B+filename%3DSurvey_on_Collaborative_Filtering_Conten.pdf&Expires=1689907791&Signature=RcQt28Rooly-CujETlxs5seOX-yqDMkudDpd1Ei1Oji8QSr0~AosZv-gpsNKwqQxy~XoFLM2skS-w6WS77o326EQS3exdUzZxWagtWj7uuszgYyCIg9~CLMCyiuCVdsie41soI4j3var8x6n8CpkyhJ0hlDd-cj-prLRCIOlMaxsxblDrfpvOdqd~ocLb4O~DJChoeT1DSlxxbbywIzoxzGtOQztbyllK7Re86~kWGmLPNe1dErtOx3I2XCPbMdwr2DHegMfneptqHQmcT3a3mEtYLz5-217-zjCsq5A54y2w3DWYCCG7zilWu5vjTRIW~APaJbMmAHUxROJmo1WzA__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA)
+- [4] [Singh, R. H., Maurya, S., Tripathi, T., Narula, T., & Srivastav, G. (2020). Movie recommendation system using cosine similarity and KNN. International Journal of Engineering and Advanced Technology, 9(5), 556-559.](http://www.edu.dmomeni98.ir/papers/Movie%20Recommendation%20System%20using%20cosine%20similarity%20and%20knn_2020.pdf)
